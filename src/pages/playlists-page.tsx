@@ -1,6 +1,5 @@
-import {useQuery} from "@tanstack/react-query"
 import {useEffect, useState} from "react"
-import {client} from "../shared/api/client"
+import {Playlists} from "../features/playlists"
 
 export const PlaylistsPage = () => {
     const [isVisible, setIsVisible] = useState(true)
@@ -14,21 +13,4 @@ export const PlaylistsPage = () => {
             <h2>hello it-incubator!!!</h2>
             {isVisible && <Playlists />}
         </>
-}
-
-export const Playlists = () => {
-    const query = useQuery({
-        queryKey: ["playlists"],
-        queryFn: () => client.GET("/playlists")
-    })
-
-    return (
-        <div>
-            <ul>
-                {query.data?.data?.data.map((playlist) => (
-                    <li>{playlist.attributes.title}</li>
-                ))}
-            </ul>
-        </div>
-    )
 }

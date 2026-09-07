@@ -1,4 +1,4 @@
-import {Playlists} from "./playlists-page.tsx"
+import {Playlists} from "../features/playlists"
 
 export const MyPlaylistsPage = ()=> {
 
