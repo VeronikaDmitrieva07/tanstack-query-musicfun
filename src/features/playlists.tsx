@@ -5,11 +5,11 @@ export const Playlists = () => {
     const query = useQuery({
         queryKey: ["playlists"],
         queryFn: async() => {
-          const response = await client.GET("/playlists" as unknown as "playlists")
+          const response = await client.GET("/playlists")
 
-            if(response.error) {
-                throw (response as unknown as {error: Error}).error
-            }
+            // if(response.error) {
+            //     throw (response as unknown as {error: Error}).error
+            // }
             return response.data
         }})
 
@@ -21,7 +21,7 @@ export const Playlists = () => {
         <div>
             {query.isFetching ? "⏳" : ""}
             <ul>
-                {query.data.data.map(playlist => (
+                {query.data?.data.map(playlist => (
                     <li key={playlist.id}>{playlist.attributes.title}</li>
                 ))}
             </ul>
