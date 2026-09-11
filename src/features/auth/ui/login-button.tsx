@@ -1,35 +1,7 @@
-import {useMutation, useQueryClient} from "@tanstack/react-query"
-import {client} from "../../../shared/api/client"
+import {callbackUrl, useLoginMutation} from "../api/use-login-mutation"
 
 export const LoginButton = () => {
-    const callbackUrl = "http://localhost:5173/oauth/callback"
-
-    const queryClient = useQueryClient()
-
-    const mutation = useMutation({
-        mutationFn: async ({code}: { code: string }) => {
-            const response = await client.POST("/auth/login", {
-                body: {
-                    code: code,
-                    redirectUri: callbackUrl,
-                    rememberMe: true,
-                    accessTokenTTL: "1d",
-                }
-            })
-            if (response.error) {
-                throw new Error("Error logging in")
-            }
-            return response.data
-        },
-
-        onSuccess: (data: { refreshToken: string; accessToken: string }) => {
-            localStorage.setItem("musicfun-refresh-token", data.refreshToken)
-            localStorage.setItem("musicfun-access-token", data.accessToken)
-            queryClient.invalidateQueries({
-                 queryKey: ["auth", "me"]
-            })
-        },
-    })
+    const mutation = useLoginMutation()
 
     const handleLoginClick = () => {
         window.addEventListener("message", handleOauthMessage)
@@ -45,12 +17,12 @@ export const LoginButton = () => {
             return
         }
 
-        const code = event.data.code;
+        const code = event.data.code
+
         if (!code) {
             console.warn('no code in message')
             return
         }
-
         mutation.mutate({code})
     }
 
