@@ -1,9 +1,10 @@
-import {useMutation} from "@tanstack/react-query"
+import {useMutation, useQueryClient} from "@tanstack/react-query"
 import {client} from "../../../shared/api/client"
-
 
 export const LoginButton = () => {
     const callbackUrl = "http://localhost:5173/oauth/callback"
+
+    const queryClient = useQueryClient()
 
     const mutation = useMutation({
         mutationFn: async ({code}: { code: string }) => {
@@ -24,6 +25,9 @@ export const LoginButton = () => {
         onSuccess: (data: { refreshToken: string; accessToken: string }) => {
             localStorage.setItem("musicfun-refresh-token", data.refreshToken)
             localStorage.setItem("musicfun-access-token", data.accessToken)
+            queryClient.invalidateQueries({
+                 queryKey: ["auth", "me"]
+            })
         },
     })
 
