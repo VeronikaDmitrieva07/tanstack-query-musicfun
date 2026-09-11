@@ -2,12 +2,17 @@ import createClient, {type Middleware} from "openapi-fetch"
 import type { paths } from "./schema"
 
 const authMiddleware: Middleware = {
-    async onRequest({request}) {
+    onRequest({request}) {
         const accessToken = localStorage.getItem("musicfun-access-token")
         if(accessToken) {
             request.headers.set("Authorization", "Bearer " + accessToken)
         }
         return request
+    },
+    onResponse({ response }) {
+        if (!response.ok) {
+            throw new Error(`${response.url}: ${response.status} ${response.statusText}`)
+        }
     }
 }
 
