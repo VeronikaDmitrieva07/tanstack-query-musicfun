@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import {useMeQuery} from "../../api/use-me-query"
+import {LogoutButton} from "../logout-button"
 
 export const CurrentUser = () => {
     const query = useMeQuery()
@@ -7,10 +8,9 @@ export const CurrentUser = () => {
     if(!query.data) return <span>...</span>
 
     return (
-        // <div className={s.meInfoContainer}>
         <div>
             <Link to="/my-playlists" activeOptions={{ exact: true }}>
-                {query.data!.login}
+                {query.data!.login} <LogoutButton />
             </Link>
         </div>
     )
