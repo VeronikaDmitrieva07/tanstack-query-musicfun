@@ -3,24 +3,29 @@ import {client} from "../shared/api/client"
 import {Pagination} from "../shared/ui/pagination/pagination"
 import {type ChangeEvent, useState} from "react"
 
-export const Playlists = () => {
+type Props = {
+    userId?: string
+}
+
+export const Playlists = ({userId}: Props) => {
     const [page, setPage] = useState(1)
     const [search, setSearch] = useState("")
 
     const query = useQuery({
-        queryKey: ["playlists", { page, search }],
-        queryFn: async() => {
-          const response = await client.GET("/playlists", {
-              params: {
-                  query: {
-                      pageNumber: page,
-                      search,
-                  }
-              }
-          })
+        queryKey: ["playlists", {page, search, userId}],
+        queryFn: async () => {
+            const response = await client.GET("/playlists", {
+                params: {
+                    query: {
+                        pageNumber: page,
+                        search,
+                        userId
+                    }
+                }
+            })
             return response.data
         },
-    placeholderData: keepPreviousData
+        placeholderData: keepPreviousData
     })
 
     if (query.isPending) return <span>Loading...</span>
