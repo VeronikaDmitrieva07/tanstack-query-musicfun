@@ -1,6 +1,6 @@
 import {keepPreviousData, useQuery} from "@tanstack/react-query"
-import {client} from "../shared/api/client"
-import {Pagination} from "../shared/ui/pagination/pagination"
+import {client} from "../../../shared/api/client"
+import {Pagination} from "../../../shared/ui/pagination/pagination"
 import {type ChangeEvent, useState} from "react"
 
 type Props = {
