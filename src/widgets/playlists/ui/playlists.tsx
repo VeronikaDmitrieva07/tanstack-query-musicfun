@@ -1,4 +1,5 @@
 import {keepPreviousData, useQuery} from "@tanstack/react-query"
+import {DeletePlaylist} from "../../../features/playlists/delete-playlist/ui/delete-playlist";
 import {client} from "../../../shared/api/client"
 import {Pagination} from "../../../shared/ui/pagination/pagination"
 import {type ChangeEvent, useState} from "react"
@@ -50,7 +51,7 @@ export const Playlists = ({userId}: Props) => {
             />
             <ul>
                 {query.data?.data.map(playlist => (
-                    <li key={playlist.id}>{playlist.attributes.title}</li>
+                    <li key={playlist.id}>{playlist.attributes.title} <DeletePlaylist playlistId={playlist.id} /></li>
                 ))}
             </ul>
         </div>
