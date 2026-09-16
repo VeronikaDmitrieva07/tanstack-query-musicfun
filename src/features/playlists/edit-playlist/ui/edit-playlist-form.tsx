@@ -2,7 +2,8 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
 import {useEffect} from "react"
 import {useForm} from "react-hook-form"
 import {client} from "../../../../shared/api/client"
-import type {SchemaUpdatePlaylistData} from "../../../../shared/api/schema"
+import type {SchemaGetPlaylistsOutput, SchemaUpdatePlaylistData} from "../../../../shared/api/schema"
+import {useMeQuery} from "../../../auth/api/use-me-query"
 
 type Props = {
     playlistId: string | null
@@ -11,12 +12,14 @@ type Props = {
 export const EditPlaylistForm = ({playlistId}: Props) => {
     const {register, handleSubmit, reset} = useForm<SchemaUpdatePlaylistData>()
 
-    useEffect(()=> {
+    const {data: meData} = useMeQuery()
+
+    useEffect(() => {
         reset()
     }, [playlistId])
 
     const {data, isPending, isError} = useQuery({
-        queryKey: ["playlists", playlistId],
+        queryKey: ["playlists", "details", playlistId],
         queryFn: async () => {
             const response = await client.GET("/playlists/{playlistId}",
                 {params: {path: {playlistId: playlistId!}}})
@@ -27,6 +30,7 @@ export const EditPlaylistForm = ({playlistId}: Props) => {
 
     const queryClient = useQueryClient()
 
+    const key = ["playlists", "my", meData!.userId]
     const {mutate} = useMutation({
         mutationFn: async (data: SchemaUpdatePlaylistData) => {
             const response = await client.PUT("/playlists/{playlistId}", {
@@ -35,11 +39,41 @@ export const EditPlaylistForm = ({playlistId}: Props) => {
             })
             return response.data
         },
-        onSuccess: () => {
+        onMutate: async (data: SchemaUpdatePlaylistData) => {
+            // eslint-disable-next-line @tanstack/query/prefer-query-options
+            await queryClient.cancelQueries({queryKey: ["playlists"]})
+
+
+            const previousMyPlaylists = queryClient.getQueryData(key)
+
+            queryClient.setQueryData(key, (oldData: SchemaGetPlaylistsOutput) => {
+                return {
+                    ...oldData,
+                    data: oldData.data.map(p => {
+                        if (p.id === playlistId) return {
+                            ...p,
+                            attributes: {
+                                ...p.attributes,
+                                description: data.attributes.description,
+                                title: data.attributes.title
+                            }
+                        }
+                        else return p
+                    })
+                }
+            })
+            return {previousMyPlaylists}
+        },
+        onError: (_, __: SchemaUpdatePlaylistData, context) => {
+            queryClient.setQueryData(
+                key,
+                context!.previousMyPlaylists)
+        },
+        onSettled: () =>
             queryClient.invalidateQueries({
                 queryKey: ["playlists"],
+                refetchType: "all"
             })
-        }
     })
 
     const onSubmit = (data: SchemaUpdatePlaylistData) => {
