@@ -1,4 +1,5 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
+import {useEffect} from "react"
 import {useForm} from "react-hook-form"
 import {client} from "../../../../shared/api/client"
 import type {SchemaUpdatePlaylistData} from "../../../../shared/api/schema"
@@ -8,7 +9,11 @@ type Props = {
 }
 
 export const EditPlaylistForm = ({playlistId}: Props) => {
-    const {register, handleSubmit} = useForm<SchemaUpdatePlaylistData>()
+    const {register, handleSubmit, reset} = useForm<SchemaUpdatePlaylistData>()
+
+    useEffect(()=> {
+        reset()
+    }, [playlistId])
 
     const {data, isPending, isError} = useQuery({
         queryKey: ["playlists", playlistId],
