@@ -5,8 +5,8 @@ import {AddPlaylistForm} from "../features/playlists/add-playlist/ui/add-playlis
 import {EditPlaylistForm} from "../features/playlists/edit-playlist/ui/edit-playlist-form"
 import {Playlists} from "../widgets/playlists/ui/playlists"
 
-export const MyPlaylistsPage = ()=> {
-const {data, isPending} = useMeQuery()
+export const MyPlaylistsPage = () => {
+    const {data, isPending} = useMeQuery()
     const [editingPlaylistId, setEditingPlaylistId] = useState<string | null>(null)
 
     if (isPending) {
@@ -14,7 +14,7 @@ const {data, isPending} = useMeQuery()
     }
 
     if (!data) {
-        return  <Navigate to={"/"} replace/>
+        return <Navigate to={"/"} replace/>
     }
     return (
         <div>
@@ -24,7 +24,7 @@ const {data, isPending} = useMeQuery()
             <hr/>
             <Playlists userId={data.userId} onPlaylistSelected={setEditingPlaylistId}/>
             <hr/>
-            {editingPlaylistId && <EditPlaylistForm key={editingPlaylistId} playlistId={editingPlaylistId}/>}
+            <EditPlaylistForm  playlistId={editingPlaylistId}/>
         </div>
     )
 }

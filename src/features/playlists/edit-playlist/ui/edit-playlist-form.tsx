@@ -4,18 +4,20 @@ import {client} from "../../../../shared/api/client"
 import type {SchemaUpdatePlaylistData} from "../../../../shared/api/schema"
 
 type Props = {
-    playlistId: string
+    playlistId: string | null
 }
 
 export const EditPlaylistForm = ({playlistId}: Props) => {
     const {register, handleSubmit} = useForm<SchemaUpdatePlaylistData>()
 
-   const {data, isPending, isError} = useQuery({
+    const {data, isPending, isError} = useQuery({
         queryKey: ["playlists", playlistId],
         queryFn: async () => {
-            const response = await client.GET("/playlists/{playlistId}", {params: {path: {playlistId}}})
+            const response = await client.GET("/playlists/{playlistId}",
+                {params: {path: {playlistId: playlistId!}}})
             return response.data!
-        }
+        },
+        enabled: !!playlistId
     })
 
     const queryClient = useQueryClient()
@@ -23,7 +25,7 @@ export const EditPlaylistForm = ({playlistId}: Props) => {
     const {mutate} = useMutation({
         mutationFn: async (data: SchemaUpdatePlaylistData) => {
             const response = await client.PUT("/playlists/{playlistId}", {
-                params: {path: {playlistId}},
+                params: {path: {playlistId: playlistId!}},
                 body: {data}
             })
             return response.data
@@ -36,11 +38,13 @@ export const EditPlaylistForm = ({playlistId}: Props) => {
     })
 
     const onSubmit = (data: SchemaUpdatePlaylistData) => {
-        mutate({...data, type: "playlists",
-             attributes: {...data.attributes, tagIds:[]}
+        mutate({
+            ...data, type: "playlists",
+            attributes: {...data.attributes, tagIds: []}
         })
     }
 
+    if (!playlistId) return <></>
     if (isPending) return <p>Loading...</p>
     if (isError) return <p>Error...</p>
 
@@ -48,7 +52,7 @@ export const EditPlaylistForm = ({playlistId}: Props) => {
         <h2>Edit Playlist</h2>
 
         <p>
-            <input {...register("attributes.title")} defaultValue={data.data.attributes.title} />
+            <input {...register("attributes.title")} defaultValue={data.data.attributes.title}/>
         </p>
 
         <p>
