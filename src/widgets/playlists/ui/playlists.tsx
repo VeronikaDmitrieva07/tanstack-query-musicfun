@@ -1,8 +1,7 @@
-import {keepPreviousData, useQuery} from "@tanstack/react-query"
-import {DeletePlaylist} from "../../../features/playlists/delete-playlist/ui/delete-playlist"
-import {client} from "../../../shared/api/client"
-import {Pagination} from "../../../shared/ui/pagination/pagination"
 import {type ChangeEvent, useState} from "react"
+import {DeletePlaylist} from "../../../features/playlists/delete-playlist/ui/delete-playlist"
+import {Pagination} from "../../../shared/ui/pagination/pagination"
+import {UsePlaylistsQuery} from "../api/use-playlists-query"
 
 type Props = {
     userId?: string
@@ -11,24 +10,10 @@ type Props = {
 }
 
 export const Playlists = ({userId, onPlaylistSelected, isSearchActive}: Props) => {
-    const [page, setPage] = useState(1)
+    const [pageNumber, setPageNumber] = useState(1)
     const [search, setSearch] = useState("")
 
-    const key = userId ? ["playlists", "my", userId] : ["playlists", {page, search}]
-    const queryParams = userId ? {userId} : {pageNumber: page, search,}
-
-    const query = useQuery({
-        queryKey: key,
-        queryFn: async () => {
-            const response = await client.GET("/playlists", {
-                params: {
-                    query: queryParams
-                }
-            })
-            return response.data
-        },
-        placeholderData: keepPreviousData
-    })
+    const query = UsePlaylistsQuery(userId, {pageNumber, search})
 
     const handleSelectPlaylistClick = (playlistId: string) => {
         onPlaylistSelected?.(playlistId)
@@ -36,7 +21,6 @@ export const Playlists = ({userId, onPlaylistSelected, isSearchActive}: Props) =
 
     if (query.isPending) return <span>Loading...</span>
     if (query.isError) return <span>{JSON.stringify(query.error.message)}</span>
-
 
     return (
         <div>
@@ -54,8 +38,8 @@ export const Playlists = ({userId, onPlaylistSelected, isSearchActive}: Props) =
             <hr/>
             <Pagination
                 pagesCount={query.data?.meta.pagesCount || 1}
-                currentPage={page}
-                onPageNumberChange={setPage}
+                currentPage={pageNumber}
+                onPageNumberChange={setPageNumber}
                 isFetching={query.isFetching}
             />
             <ul>

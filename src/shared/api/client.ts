@@ -1,7 +1,9 @@
 import createClient, {type Middleware} from "openapi-fetch"
+import {localStorageKeys} from "../config/localstorage-keys"
 import type {paths} from "./schema"
 
-export const baseUrl = "https://musicfun.it-incubator.app/api/1.0/"
+export const baseUrl = import.meta.env.VITE_BASE_URL
+export const apiKey = import.meta.env.VITE_API_KEY
 
 // mutex
 let refreshPromise: Promise<void> | null = null
@@ -9,11 +11,11 @@ let refreshPromise: Promise<void> | null = null
 const makeRefreshToken = () => {
     if (!refreshPromise) {
         refreshPromise = (async (): Promise<void> => {
-            const refreshToken = localStorage.getItem("musicfun-refresh-token")
+            const refreshToken = localStorage.getItem(localStorageKeys.refreshToken)
 
             if (!refreshToken) {
-                localStorage.removeItem("musicfun-refresh-token")
-                localStorage.removeItem("musicfun-access-token")
+                localStorage.removeItem(localStorageKeys.refreshToken)
+                localStorage.removeItem(localStorageKeys.accessToken)
                 throw new Error("No refresh token")
             }
 
@@ -30,8 +32,8 @@ const makeRefreshToken = () => {
             if (!response.ok) throw new Error("Refresh token failed")
 
             const data = await response.json()
-            localStorage.setItem("musicfun-refresh-token", data.refreshToken)
-            localStorage.setItem("musicfun-access-token", data.accessToken)
+            localStorage.setItem(localStorageKeys.refreshToken, data.refreshToken)
+            localStorage.setItem(localStorageKeys.accessToken, data.accessToken)
 
 
         })()
@@ -46,7 +48,7 @@ const makeRefreshToken = () => {
 
 const authMiddleware: Middleware = {
     onRequest({request}) {
-        const accessToken = localStorage.getItem("musicfun-access-token")
+        const accessToken = localStorage.getItem(localStorageKeys.accessToken)
         if (accessToken) {
             request.headers.set("Authorization", "Bearer " + accessToken)
         }
@@ -68,7 +70,7 @@ const authMiddleware: Middleware = {
             const originalRequest: Request = request._retryRequest
             const retryRequest = new Request(originalRequest, {headers: new Headers(originalRequest.headers)})
 
-            retryRequest.headers.set("Authorization", "Bearer " + localStorage.getItem("musicfun-access-token"))
+            retryRequest.headers.set("Authorization", "Bearer " + localStorage.getItem(localStorageKeys.accessToken))
 
             return fetch(retryRequest)
         } catch {
@@ -80,7 +82,7 @@ const authMiddleware: Middleware = {
 export const client = createClient<paths>({
     baseUrl: baseUrl,
     headers: {
-        "api-key": import.meta.env.VITE_API_KEY,
+        "api-key": apiKey,
     }
 })
 
