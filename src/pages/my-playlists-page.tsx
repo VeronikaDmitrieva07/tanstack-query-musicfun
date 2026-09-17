@@ -32,7 +32,7 @@ export const MyPlaylistsPage = () => {
                        onPlaylistSelected={(playlistId)=>setEditingPlaylistId(playlistId)}
                        onPlaylistDeleted={handlePlaylistDelete}/>
             <hr/>
-            <EditPlaylistForm  playlistId={editingPlaylistId}/>
+            <EditPlaylistForm  playlistId={editingPlaylistId} onCancelEditing={()=> {setEditingPlaylistId(null)}}/>
         </div>
     )
 }

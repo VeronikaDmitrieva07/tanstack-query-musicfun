@@ -3,7 +3,7 @@ import {client} from "../../../../shared/api/client"
 import {playlistsKeys} from "../../../../shared/api/keys-factories/playlists-keys-factory"
 import type {SchemaGetPlaylistsOutput, SchemaUpdatePlaylistData} from "../../../../shared/api/schema"
 
-export const useUpdatePlaylistMutation = (playlistId: string | null) => {
+export const useUpdatePlaylistMutation = (playlistId: string | null, {onSuccess}: {onSuccess?: () => void}) => {
     const queryClient = useQueryClient()
     const key = playlistsKeys.myList()
 
@@ -42,6 +42,9 @@ export const useUpdatePlaylistMutation = (playlistId: string | null) => {
             queryClient.setQueryData(
                 key,
                 context!.previousMyPlaylists)
+        },
+        onSuccess: () => {
+            onSuccess?.()
         },
         onSettled: () => {
             queryClient.invalidateQueries({
